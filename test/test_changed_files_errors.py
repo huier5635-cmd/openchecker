@@ -67,6 +67,20 @@ class ChangedFilesErrorsTest(unittest.TestCase):
     def test_unknown_commit_hash_is_an_error(self):
         self.assert_scan_failed("f" * 40)
 
+    def test_filename_cannot_hide_an_unknown_revision(self):
+        # Without the revision/path separator Git accepts this as a pathspec
+        # and reports success, although the requested revision does not exist.
+        (self.repo / "missing-reference..HEAD").write_text(
+            "untracked collision", encoding="utf-8")
+        self.assert_scan_failed("missing-reference")
+
+    def test_filename_cannot_break_a_valid_revision(self):
+        (self.repo / f"{self.base}..HEAD").write_text(
+            "untracked collision", encoding="utf-8")
+        result = self.scan(self.base)
+        self.assertNotIn("error", result)
+        self.assertEqual(result["changed_files"], ["added.txt", "tracked.txt"])
+
     def test_missing_git_executable_is_an_error(self):
         empty_path = self.root / "empty-path"
         empty_path.mkdir()

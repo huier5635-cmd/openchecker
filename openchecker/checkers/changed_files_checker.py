@@ -78,8 +78,9 @@ def _get_diff_files(commit_hash: str, type: str = "ACDMRTUXB") -> List[str]:
         OSError: The Git process cannot be started.
     """
     try:
+        # Keep the range a revision even when a file has the same name.
         result = subprocess.check_output(
-            ["git", "diff", "--name-only", f"--diff-filter={type}", f"{commit_hash}..HEAD"],
+            ["git", "diff", "--name-only", f"--diff-filter={type}", f"{commit_hash}..HEAD", "--"],
             stderr=subprocess.STDOUT,
             text=True
         )
