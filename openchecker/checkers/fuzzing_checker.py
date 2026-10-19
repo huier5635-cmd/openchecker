@@ -114,7 +114,8 @@ def check_clusterfuzz_lite(repo_path: str) -> Dict:
             with open(dockerfile_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 # 检查是否包含命令（以#开头的注释不算）
-                if content.strip() and not content.strip().startswith('#'):
+                if any(line.strip() and not line.lstrip().startswith('#')
+                       for line in content.splitlines()):
                     return create_fuzzing_result(
                         FUZZING_TOOLS['CLUSTERFUZZ_LITE'],
                         True,
